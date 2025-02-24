@@ -1,0 +1,7 @@
+.vscode
+.mvn
+target
+temp
+src/main/resources/db/.env
+src/main/resources/.env
+logs
