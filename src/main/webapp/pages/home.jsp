@@ -1,4 +1,5 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %> 
+<%@ page import="javax.servlet.http.HttpSession" %>
 
 <!DOCTYPE html>
 <html lang="it" data-bs-theme="dark">
@@ -21,16 +22,28 @@
     <header><%@ include file="../templates/navbar.jsp" %></header>
     <main
       class="d-flex justify-content-center align-items-center min-vh-100 p-2"
-    ></main>
-    <footer></footer>
+    >
+      <% 
+      HttpSession session = request.getSession(false);
+      if (session != null && session.getAttribute("username") != null) { 
+        String username = (String) session.getAttribute("username"); 
+      %>
+      <h1>Benvenuto, <%= username %>!</h1>
+      <p>Sei loggato correttamente.</p>
+      <a href="logout">Logout</a>
+      <% } else { %>
+      <h1>Devi effettuare il login!</h1>
+      <a href="login.jsp">Login</a>
+      <% } %>
+    </main>
+
+    <%@ include file="../templates/footer.jsp" %>
+
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
       integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
       crossorigin="anonymous"
     ></script>
-
-    <%@ include file="../templates/footer.jsp" %>
-
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
       integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"

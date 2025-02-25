@@ -4,6 +4,13 @@ function prepareData() {
   const form = document.getElementById("userForm");
   const formData = new FormData(form);
 
+  const isRegistrationChecked = document.getElementById(
+    "toggleDetailsButton"
+  ).checked;
+  if (!isRegistrationChecked) {
+    formData.set("isRegistration", "off");
+  }
+
   return Object.fromEntries(formData.entries());
 }
 
@@ -33,13 +40,16 @@ async function registerUser() {
 function toggleDetailsPane() {
   const details = document.getElementById("additionalDetails");
   const inputs = Array.from(details.querySelectorAll("input"));
+  const formTitle = document.getElementById("formTitle");
 
   if (details.style.display === "none") {
     details.style.display = "block";
+    formTitle.innerText = "Registrati";
     inputs.forEach((input) => {
       input.setAttribute("required", "");
     });
   } else {
+    formTitle.innerText = "Login";
     details.style.display = "none";
     inputs.forEach((input) => {
       input.removeAttribute("required");
@@ -53,8 +63,6 @@ const main = () => {
   document
     .getElementById("toggleDetailsButton")
     .addEventListener("click", toggleDetailsPane);
-
-  console.log("raga ma funziona");
 
   Array.from(forms).forEach((form) => {
     form.addEventListener(

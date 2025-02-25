@@ -91,4 +91,22 @@ public class DBConnectionManager {
         }
     }
 
+    public static boolean fieldExists(final String tableName, final String field, final String param)
+            throws SQLException {
+        final String query = "SELECT COUNT(*) AS count FROM " + tableName + " WHERE " + field + " = ?";
+
+        try {
+            List<JSONObject> result = DBConnectionManager.executeQuery(query, param);
+            if (!result.isEmpty()) {
+                int count = result.get(0).getInt("count");
+                return count > 0;
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Errore durante esecuzione {}", query, e);
+            throw e;
+        }
+
+        return false;
+    }
+
 }

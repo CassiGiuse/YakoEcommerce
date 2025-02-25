@@ -5,36 +5,27 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.*;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import utils.DBConnectionManager;
-import utils.ServletsUtils;
+
+// import utils.DBConnectionManager;
+
+import static utils.DBConnectionManager.*;
+import static utils.ServletsUtils.*;
+import static utils.JsonResponder.*;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
     private static Logger LOGGER = LogManager.getLogger();
-
-    private static boolean userExists(final String username) throws SQLException {
-        final String query = "SELECT COUNT(*) AS count FROM credenziali WHERE username = ?";
-
-        try {
-            List<JSONObject> result = DBConnectionManager.executeQuery(query, username);
-            if (!result.isEmpty()) {
-                int count = result.get(0).getInt("count");
-                return count > 0;
-            }
-        } catch (SQLException e) {
-            throw e;
-        }
-
-        return false;
-    }
 
     private static void loadDataToHTTPSession(final HttpServletRequest req, final JSONObject json) throws SQLException {
         HttpSession session = req.getSession();
@@ -59,7 +50,15 @@ public class LoginServlet extends HttpServlet {
         final String username = userData.getString("username");
 
         try {
-            List<JSONObject> users = DBConnectionManager.executeQuery(query, username, password);
+            if (!isFieldInvalid("credenziali", "username", username)) {
+                return buildStatusResponse(false, "Utente inesistente, riprovare!");
+            }
+        } catch (SQLException e) {
+            return buildStatusResponse(false, "Registrazione fallita!");
+        }
+
+        try {
+            List<JSONObject> users = executeQuery(query, username, password);
             if (!users.isEmpty()) {
                 loadDataToHTTPSession(req, users.get(0));
                 LOGGER.info("L'utente {} ha appena effettuato il login.", username);
@@ -82,6 +81,49 @@ public class LoginServlet extends HttpServlet {
         final String queryUtenti = "INSERT INTO Utenti (Nome, Cognome, Email, Telefono) VALUES (?, ?, ?, ?);";
         final String queryCredenziali = "INSERT INTO Credenziali (Username, Passwd, UserID) VALUES (?, ?, LAST_INSERT_ID());";
 
+        final ServletContext cxt = req.getServletContext();
+        ArrayList<String> invalidFields = new ArrayList<>();
+
+        try {
+            if (isFieldInvalid("credenziali", "username", userData.getString("username"))) {
+                return buildStatusResponse(false, "Utente esistente, riprovare!");
+            }
+        } catch (SQLException e) {
+            return buildStatusResponse(false, "Registrazione fallita!");
+        }
+
+        for (final String tableName : new String[] { "utenti", "credenziali" }) {
+            List<String> columnNames = getColumnNamesFromContext(cxt, tableName);
+
+            for (final String cName : columnNames) {
+                if (cName.equalsIgnoreCase("passwd"))
+                    continue;
+
+                String userInfo = getUserInfo(userData, cName);
+                if (userInfo == null) {
+                    return buildStatusResponse(false,
+                            String.format("Campo %s non fornito durante la registrazione.", cName));
+                }
+
+                if (userInfo.isBlank()) {
+                    return buildStatusResponse(false, String.format("È necessario specificare il campo %s!", cName));
+                }
+
+                try {
+                    if (isFieldInvalid(tableName, cName.toLowerCase(), userInfo)) {
+                        invalidFields.add(cName);
+                    }
+                } catch (SQLException e) {
+                    return buildStatusResponse(false, "Registrazione fallita!");
+                }
+            }
+        }
+
+        if (!invalidFields.isEmpty()) {
+            final String errorMessage = "Impossibile effettuare registrazione, alcuni campi non sono validi";
+            return buildInvalidFieldsResponse(errorMessage, invalidFields);
+        }
+
         final String nome = userData.getString("nome");
         final String cognome = userData.getString("cognome");
         final String email = userData.getString("email");
@@ -103,27 +145,35 @@ public class LoginServlet extends HttpServlet {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
+    private static List<String> getColumnNamesFromContext(ServletContext cxt, String tableName) {
+        final String attrName = String.format("%sColumns", tableName);
+        return (List<String>) cxt.getAttribute(attrName);
+    }
+
+    private static String getUserInfo(JSONObject userData, String cName) {
+        try {
+            return userData.getString(cName.toLowerCase());
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    private static boolean isFieldInvalid(String tableName, String key, String userInfo) throws SQLException {
+        return fieldExists(tableName, key, userInfo);
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        final JSONObject userData = ServletsUtils.getJsonFromRequest(request);
+        final JSONObject userData = getJsonFromRequest(request);
+        System.out.println(userData.toString());
+        final boolean isRegistration = userData.getString("isRegistration").equals("on");
 
-        final String username = userData.getString("username");
-        boolean userExists;
-        try {
-            userExists = userExists(username);
-        } catch (SQLException e) {
-            LOGGER.error("Errore durante esecuzione query", e);
-            JSONObject errorResponse = new JSONObject();
-            errorResponse.put("errore", "errore durante esecuzione query");
-            ServletsUtils.sendJSONResponse(response, errorResponse);
-            return;
-        }
-
-        final JSONObject res = userExists ? login(request, userData) : signup(request, userData);
-        ServletsUtils.sendJSONResponse(response, res);
+        final JSONObject res = isRegistration ? signup(request, userData) : login(request, userData);
+        sendJSONResponse(response, res);
     }
 }

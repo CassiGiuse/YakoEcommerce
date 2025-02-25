@@ -124,7 +124,6 @@
               </div>
             </div>
           </div>
-
           <!-- Terms and Conditions -->
           <div class="row mt-3">
             <div class="col-12">
@@ -150,6 +149,7 @@
                   type="checkbox"
                   id="toggleDetailsButton"
                   class="form-check-input"
+                  name="isRegistration"
                 />
                 <label class="form-check-label" for="toggleDetailsButton">
                   Registrati

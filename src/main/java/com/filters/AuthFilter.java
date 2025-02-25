@@ -1,29 +1,29 @@
-package com.filters;
+// package com.filters;
 
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-// import javax.servlet.http.HttpServletRequest;
-// import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+// import javax.servlet.*;
+// import javax.servlet.annotation.WebFilter;
+// // import javax.servlet.http.HttpServletRequest;
+// // import javax.servlet.http.HttpServletResponse;
+// import java.io.IOException;
 
-@WebFilter("/pages/*")
-public class AuthFilter implements Filter {
+// @WebFilter("/pages/*")
+// public class AuthFilter implements Filter {
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        // Inizializzazioni opzionali
-    }
+//     @Override
+//     public void init(FilterConfig filterConfig) throws ServletException {
+//         // Inizializzazioni opzionali
+//     }
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+//     @Override
+//     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+//             throws IOException, ServletException {
 
-        // HttpServletRequest httpRequest = (HttpServletRequest) request;
-        // HttpServletResponse httpResponse = (HttpServletResponse) response;
-    }
+//         // HttpServletRequest httpRequest = (HttpServletRequest) request;
+//         // HttpServletResponse httpResponse = (HttpServletResponse) response;
+//     }
 
-    @Override
-    public void destroy() {
-        // Cleanup opzionale
-    }
-}
+//     @Override
+//     public void destroy() {
+//         // Cleanup opzionale
+//     }
+// }
