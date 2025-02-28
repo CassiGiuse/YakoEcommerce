@@ -1,29 +1,38 @@
-// package com.filters;
+package com.filters;
 
-// import javax.servlet.*;
-// import javax.servlet.annotation.WebFilter;
-// // import javax.servlet.http.HttpServletRequest;
-// // import javax.servlet.http.HttpServletResponse;
-// import java.io.IOException;
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-// @WebFilter("/pages/*")
-// public class AuthFilter implements Filter {
+import java.io.IOException;
 
-//     @Override
-//     public void init(FilterConfig filterConfig) throws ServletException {
-//         // Inizializzazioni opzionali
-//     }
+@WebFilter("/pages/*")
+public class AuthFilter implements Filter {
 
-//     @Override
-//     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-//             throws IOException, ServletException {
+  @Override
+  public void init(FilterConfig filterConfig) throws ServletException {
+  }
 
-//         // HttpServletRequest httpRequest = (HttpServletRequest) request;
-//         // HttpServletResponse httpResponse = (HttpServletResponse) response;
-//     }
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
 
-//     @Override
-//     public void destroy() {
-//         // Cleanup opzionale
-//     }
-// }
+    final HttpServletRequest httpRequest = (HttpServletRequest) request;
+    final HttpServletResponse httpResponse = (HttpServletResponse) response;
+    final HttpSession session = httpRequest.getSession(false);
+
+    if (session == null || session.getAttribute("username") == null) {
+      httpResponse.sendRedirect(httpRequest.getContextPath() + "/index.jsp?error=notAuthenticated");
+      return;
+    }
+
+    chain.doFilter(request, response);
+
+  }
+
+  @Override
+  public void destroy() {
+  }
+}

@@ -51,7 +51,6 @@ public class LoginServlet extends HttpServlet {
         }
 
         final JSONObject res = isRegistration ? signup(request, userData) : login(request, userData);
-        LOGGER.info("Risposta inviata: {}", res.toString());
         sendJSONResponse(response, res);
     }
 }

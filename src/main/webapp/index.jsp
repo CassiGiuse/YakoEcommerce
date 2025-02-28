@@ -1,4 +1,5 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %> <% String
+errorMessage = (String) request.getAttribute("errorMessage"); %>
 
 <!DOCTYPE html>
 <html lang="it" data-bs-theme="dark">
@@ -7,7 +8,6 @@
   </head>
 
   <body>
-    <%-- Header comune per il sido --%>
     <%@ include file="src/templates/components/header.jsp" %>
 
     <main
@@ -157,6 +157,17 @@
     </main>
 
     <%@ include file="src/templates/footerAndScripts.jsp" %>
-    <script src="js/main.js"></script>
+    <script src="src/js/main.js"></script>
+
+    <script>
+      const errorMessage = `<%= request.getParameter("error") %>`;
+      if (errorMessage == "notAuthenticated") {
+        Swal.fire({
+          title: "Errore",
+          text: errorMessage,
+          icon: "error",
+        });
+      }
+    </script>
   </body>
 </html>

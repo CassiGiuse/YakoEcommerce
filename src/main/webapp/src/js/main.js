@@ -1,5 +1,33 @@
 "use strict";
 
+function handleServerResponse(res) {
+  if ("MESSAGE_TYPE" in res && res.MESSAGE_TYPE == "INVALID_FIELDS") {
+    Swal.fire({
+      title: "Errore!",
+      text: res.msg,
+      icon: "error",
+    });
+    return;
+  }
+
+  if (!res.status) {
+    Swal.fire({
+      title: "Errore!",
+      text: res.msg,
+      icon: "error",
+    });
+    return;
+  }
+
+  Swal.fire({
+    title: "Successo!",
+    text: res.msg,
+    icon: "success",
+  }).then((_) => {
+    window.location.href = "/servlet_tre/pages/home.jsp";
+  });
+}
+
 function prepareData() {
   const form = document.getElementById("userForm");
   const formData = new FormData(form);
@@ -31,7 +59,7 @@ async function registerUser() {
     }
 
     const result = await response.json();
-    console.log("Risposta dal server:", result);
+    handleServerResponse(result);
   } catch (error) {
     console.error("Errore durante l'invio dei dati:", error.message);
   }

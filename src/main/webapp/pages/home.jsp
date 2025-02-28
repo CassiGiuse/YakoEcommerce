@@ -12,7 +12,10 @@
     <main
       class="d-flex justify-content-center align-items-center min-vh-100 p-2"
     >
-      Ciao!
+      <%
+      String session_u_name = (String)session.getAttribute("username");
+      out.print("Hi "+session_u_name);
+      %>
     </main>
 
     <%@ include file="../src/templates/footerAndScripts.jsp" %>

@@ -30,7 +30,7 @@ public class UserAuth {
 
     for (String key : json.keySet()) {
       Object value = json.get(key);
-      session.setAttribute(key, value);
+      session.setAttribute(key.toLowerCase(), value);
     }
   }
 
@@ -68,7 +68,7 @@ public class UserAuth {
 
     try {
       if (isFieldInvalid("credenziali", "username", username)) {
-        LOGGER.warn("Utente {} esistente, registrazione fallita.", userData.getString(queryCredenziali));
+        LOGGER.warn("Utente {} esistente, registrazione fallita.", username);
         return buildStatusResponse(false, "Utente esistente, riprovare!");
       }
     } catch (SQLException e) {
@@ -145,6 +145,11 @@ public class UserAuth {
             WHERE c.username = ? AND c.Passwd = ?;
         """;
 
+    if (!userData.has("passwd")) {
+      LOGGER.warn("Utente {} non ha fornito password durante il login.", username);
+      return buildStatusResponse(false, "Si prega di fornire una password");
+    }
+
     final String password = DigestUtils.sha256Hex(userData.getString("passwd"));
 
     try {
@@ -168,7 +173,8 @@ public class UserAuth {
         result.put("msg", "Utente loggato correttamente");
       } else {
         LOGGER.warn("L'utente {} ha appena tentato di effettuare il login fornendo credenziali errate", username);
-        result.put("error", "Credenziali non valide");
+        result.put("status", false);
+        result.put("msg", "Credenziali non valide");
       }
 
       return result;
